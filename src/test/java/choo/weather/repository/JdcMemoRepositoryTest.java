@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional
-class JdcMemoRepositoryTest {
+class JdbcMemoRepositoryTest {
 
     @Autowired
-    JdcMemoRepository jdcMemoRepository;
+    JdbcMemoRepository jdbcMemoRepository;
 
 
     @Test
@@ -24,9 +24,9 @@ class JdcMemoRepositoryTest {
         //given
         Memo newMemo = new Memo(2, "이건 2번이야");
         //when
-        jdcMemoRepository.save(newMemo);
+        jdbcMemoRepository.save(newMemo);
         //then
-        Optional<Memo> result = jdcMemoRepository.findById(2);
+        Optional<Memo> result = jdbcMemoRepository.findById(2);
         assertEquals(result.get().getText() ,"이건 2번이야");
 
     }

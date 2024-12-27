@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JdcMemoRepository {
+public class JdbcMemoRepository {
 
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public JdcMemoRepository(DataSource dataSource) {
+    public JdbcMemoRepository(DataSource dataSource) {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
