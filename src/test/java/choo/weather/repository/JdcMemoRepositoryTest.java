@@ -22,12 +22,12 @@ class JdbcMemoRepositoryTest {
     @Test
     void insertNewMemo() {
         //given
-        Memo newMemo = new Memo(2, "이건 2번이야");
+        Memo newMemo = new Memo(3L, "이건 3번이야");
         //when
         jdbcMemoRepository.save(newMemo);
         //then
-        Optional<Memo> result = jdbcMemoRepository.findById(2);
-        assertEquals(result.get().getText() ,"이건 2번이야");
+        Optional<Memo> result = jdbcMemoRepository.findById(3);
+        assertEquals(result.get().getText() ,"이건 3번이야");
 
     }
 
