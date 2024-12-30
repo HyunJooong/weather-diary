@@ -9,6 +9,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -111,41 +113,6 @@ public class DiaryService {
         return resultMap;
     }*/
 
-
-    /**
-     * 날씨 일기 작성
-     *
-     * @param date 해당 날짜
-     * @param text 일기 내용
-     * @return
-     */
-    public String createDiary(LocalDate date, String text) {
-        String weatherData = getWeatherString();
-
-        // Check if the weather data retrieval failed
-        if ("failed to get response".equals(weatherData)) {
-            throw new RuntimeException("Failed to fetch weather data from OpenWeather API.");
-        }
-
-        Map<String, Object> parseWeather = parseWeather(weatherData);
-
-        // Handle missing data gracefully
-        String weather = parseWeather.get("main") != null ? parseWeather.get("main").toString() : "Unknown";
-        String icon = parseWeather.get("icon") != null ? parseWeather.get("icon").toString() : "N/A";
-        Double temperature = parseWeather.get("temp") != null ? (Double) parseWeather.get("temp") : 0.0;
-
-        Diary myDiary = new Diary();
-        myDiary.setWeather(weather);
-        myDiary.setIcon(icon);
-        myDiary.setTemperature(temperature);
-        myDiary.setText(text);
-        myDiary.setDate(date);
-
-        diaryRepository.save(myDiary);
-        return weatherData;
-    }
-
-
     /**
      * 날씨 openapi json data
      *
@@ -184,11 +151,46 @@ public class DiaryService {
     }
 
     /**
+     * 날씨 일기 작성
+     *
+     * @param date 해당 날짜
+     * @param text 일기 내용
+     * @return
+     */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public String createDiary(LocalDate date, String text) {
+        String weatherData = getWeatherString();
+
+        // Check if the weather data retrieval failed
+        if ("failed to get response".equals(weatherData)) {
+            throw new RuntimeException("Failed to fetch weather data from OpenWeather API.");
+        }
+
+        Map<String, Object> parseWeather = parseWeather(weatherData);
+
+        // Handle missing data gracefully
+        String weather = parseWeather.get("main") != null ? parseWeather.get("main").toString() : "Unknown";
+        String icon = parseWeather.get("icon") != null ? parseWeather.get("icon").toString() : "N/A";
+        Double temperature = parseWeather.get("temp") != null ? (Double) parseWeather.get("temp") : 0.0;
+
+        Diary myDiary = new Diary();
+        myDiary.setWeather(weather);
+        myDiary.setIcon(icon);
+        myDiary.setTemperature(temperature);
+        myDiary.setText(text);
+        myDiary.setDate(date);
+
+        diaryRepository.save(myDiary);
+        return weatherData;
+    }
+
+    /**
      * 날짜 기준 일기 가져오기
      *
      * @param date 날짜기준
      * @return 해당 날짜 일기들 가져오기
      */
+    @Transactional(readOnly = true)
     public List<Diary> readDiary(LocalDate date) {
         return diaryRepository.findAllByDate(date);
     }
@@ -200,6 +202,7 @@ public class DiaryService {
      * @param endDate   종료 날짜
      * @return 일기 list
      */
+    @Transactional(readOnly = true)
     public List<Diary> readDiaries(LocalDate startDate, LocalDate endDate) {
         return diaryRepository.findAllByDateBetween(startDate, endDate);
     }
@@ -217,6 +220,11 @@ public class DiaryService {
 
     }
 
+    /**
+     * 일기 삭제
+     *
+     * @param date 해당 날짜 일기 모두 삭제
+     */
     public void deleteDiary(LocalDate date) {
         diaryRepository.deleteAllByDate(date);
     }
