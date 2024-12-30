@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,33 +31,6 @@ public class DiaryService {
     public DiaryService(DiaryRepository diaryRepository) {
         this.diaryRepository = diaryRepository;
     }
-
-    public String createDiary(LocalDate date, String text) {
-        String weatherData = getWeatherString();
-
-        // Check if the weather data retrieval failed
-        if ("failed to get response".equals(weatherData)) {
-            throw new RuntimeException("Failed to fetch weather data from OpenWeather API.");
-        }
-
-        Map<String, Object> parseWeather = parseWeather(weatherData);
-
-        // Handle missing data gracefully
-        String weather = parseWeather.get("main") != null ? parseWeather.get("main").toString() : "Unknown";
-        String icon = parseWeather.get("icon") != null ? parseWeather.get("icon").toString() : "N/A";
-        Double temperature = parseWeather.get("temp") != null ? (Double) parseWeather.get("temp") : 0.0;
-
-        Diary myDiary = new Diary();
-        myDiary.setWeather(weather);
-        myDiary.setIcon(icon);
-        myDiary.setTemperature(temperature);
-        myDiary.setText(text);
-        myDiary.setDate(date);
-
-        diaryRepository.save(myDiary);
-        return weatherData;
-    }
-
 
   /*  public String createDiary(LocalDate date, String text) {
         //open weather map 에서 날씨 데이터 가져오기
@@ -137,6 +111,46 @@ public class DiaryService {
         return resultMap;
     }*/
 
+
+    /**
+     * 날씨 일기 작성
+     *
+     * @param date 해당 날짜
+     * @param text 일기 내용
+     * @return
+     */
+    public String createDiary(LocalDate date, String text) {
+        String weatherData = getWeatherString();
+
+        // Check if the weather data retrieval failed
+        if ("failed to get response".equals(weatherData)) {
+            throw new RuntimeException("Failed to fetch weather data from OpenWeather API.");
+        }
+
+        Map<String, Object> parseWeather = parseWeather(weatherData);
+
+        // Handle missing data gracefully
+        String weather = parseWeather.get("main") != null ? parseWeather.get("main").toString() : "Unknown";
+        String icon = parseWeather.get("icon") != null ? parseWeather.get("icon").toString() : "N/A";
+        Double temperature = parseWeather.get("temp") != null ? (Double) parseWeather.get("temp") : 0.0;
+
+        Diary myDiary = new Diary();
+        myDiary.setWeather(weather);
+        myDiary.setIcon(icon);
+        myDiary.setTemperature(temperature);
+        myDiary.setText(text);
+        myDiary.setDate(date);
+
+        diaryRepository.save(myDiary);
+        return weatherData;
+    }
+
+
+    /**
+     * 날씨 openapi json data
+     *
+     * @return
+     */
     private String getWeatherString() {
         String apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=seoul&appid="
                 + apiKey;
@@ -167,5 +181,43 @@ public class DiaryService {
             return "failed to get response";
         }
 
+    }
+
+    /**
+     * 날짜 기준 일기 가져오기
+     *
+     * @param date 날짜기준
+     * @return 해당 날짜 일기들 가져오기
+     */
+    public List<Diary> readDiary(LocalDate date) {
+        return diaryRepository.findAllByDate(date);
+    }
+
+    /**
+     * 날짜 기준 일기들 가져오기
+     *
+     * @param startDate 시작 날짜
+     * @param endDate   종료 날짜
+     * @return 일기 list
+     */
+    public List<Diary> readDiaries(LocalDate startDate, LocalDate endDate) {
+        return diaryRepository.findAllByDateBetween(startDate, endDate);
+    }
+
+    /**
+     * 일기 변경
+     *
+     * @param date 해당 날짜
+     * @param text 변경 일기 내용
+     */
+    public void updateDiary(LocalDate date, String text) {
+        Diary editDiary = diaryRepository.getFirstByDate(date);
+        editDiary.setText(text);
+        diaryRepository.save(editDiary);
+
+    }
+
+    public void deleteDiary(LocalDate date) {
+        diaryRepository.deleteAllByDate(date);
     }
 }
