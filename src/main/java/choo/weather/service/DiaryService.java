@@ -1,14 +1,16 @@
 package choo.weather.service;
 
+import choo.weather.WeatherApplication;
 import choo.weather.domain.DateWeather;
 import choo.weather.domain.Diary;
 import choo.weather.repository.DateWeatherRepository;
 import choo.weather.repository.DiaryRepository;
-import lombok.extern.log4j.Log4j2;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Log4j2
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
     private final DateWeatherRepository dateWeatherRepository;
+    private static final Logger logger = LoggerFactory.getLogger(WeatherApplication.class);
 
     @Value("${openweathermap.key}")
     private String apiKey;
@@ -178,20 +180,8 @@ public class DiaryService {
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void createDiary(LocalDate date, String text) {
-       /* String weatherData = getWeatherString();
 
-        // Check if the weather data retrieval failed
-        if ("failed to get response".equals(weatherData)) {
-            throw new RuntimeException("Failed to fetch weather data from OpenWeather API.");
-        }
-
-        Map<String, Object> parseWeather = parseWeather(weatherData);*/
-
-        // Handle missing data gracefully
-      /*  String weather = parseWeather.get("main") != null ? parseWeather.get("main").toString() : "Unknown";
-        String icon = parseWeather.get("icon") != null ? parseWeather.get("icon").toString() : "N/A";
-        Double temperature = parseWeather.get("temp") != null ? (Double) parseWeather.get("temp") : 0.0;*/
-
+        logger.info("started to create diary");
         //날씨 데이터 가죠오기(api or db)
         DateWeather getDateWeather = getDateWeather(date);
 
@@ -218,6 +208,7 @@ public class DiaryService {
      */
     @Transactional(readOnly = true)
     public List<Diary> readDiary(LocalDate date) {
+        logger.debug("read Diary");
         return diaryRepository.findAllByDate(date);
     }
 

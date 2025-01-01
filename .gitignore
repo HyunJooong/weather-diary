@@ -39,5 +39,6 @@ out/
 ### resources ###
 
 resouces/application.properties
-/.log
+logs
+
 
