@@ -3,6 +3,7 @@ package choo.weather.service;
 import choo.weather.WeatherApplication;
 import choo.weather.domain.DateWeather;
 import choo.weather.domain.Diary;
+import choo.weather.error.InvalidDate;
 import choo.weather.repository.DateWeatherRepository;
 import choo.weather.repository.DiaryRepository;
 import org.json.simple.JSONArray;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.InvalidClassException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
@@ -122,6 +124,7 @@ public class DiaryService {
 
     /**
      * 날씨 데이터 API 가져오기
+     *
      * @return
      */
     private DateWeather getWeatherFromApi() {
@@ -197,7 +200,7 @@ public class DiaryService {
         if (dateWeatherListFromDB.size() == 0) {
             //api에서 현재 날씨 가져오기
             return getWeatherFromApi();
-        }else return dateWeatherListFromDB.get(0); //DB에서 현재 날씨 가져오기
+        } else return dateWeatherListFromDB.get(0); //DB에서 현재 날씨 가져오기
     }
 
     /**
@@ -208,7 +211,9 @@ public class DiaryService {
      */
     @Transactional(readOnly = true)
     public List<Diary> readDiary(LocalDate date) {
-        logger.info("read Diary");
+     /*   if (date.isAfter(LocalDate.ofYearDay(3000, 1))) {
+            throw new InvalidDate();
+        }*/
         return diaryRepository.findAllByDate(date);
     }
 
