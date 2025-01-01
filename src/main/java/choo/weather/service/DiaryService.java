@@ -196,7 +196,7 @@ public class DiaryService {
         List<DateWeather> dateWeatherListFromDB = dateWeatherRepository.findAllByDate(date);
         if (dateWeatherListFromDB.size() == 0) {
             //api에서 현재 날씨 가져오기
-            return getDateWeather(date);
+            return getWeatherFromApi();
         }else return dateWeatherListFromDB.get(0); //DB에서 현재 날씨 가져오기
     }
 
@@ -208,7 +208,7 @@ public class DiaryService {
      */
     @Transactional(readOnly = true)
     public List<Diary> readDiary(LocalDate date) {
-        logger.debug("read Diary");
+        logger.info("read Diary");
         return diaryRepository.findAllByDate(date);
     }
 
