@@ -158,7 +158,7 @@ public class DiaryService {
      * 매일 오전 1시 날씨 데이터 저장 스케쥴링
      */
     @Transactional
-    @Scheduled(cron = "0 0 1 * * *") // 매일 1시 마다 실행
+    @Scheduled(cron = "0 0 1 * * *") // cron 스케줄러 적용(매일 1시 마다 실행)
     public void saveWeatherData() {
         try {
             DateWeather dateWeather = getWeatherFromApi();
